@@ -14,9 +14,9 @@ fn git(command: Vec<&str>) -> io::Result<Output> {
     // .expect("Failed to execute git"))
 }
 
-pub fn install(dest_dir: Option<String>) -> () {
+pub fn install(dest_dir: Option<&str>) -> () {
     let husky_dir = get_absolute_path(
-        &dest_dir.unwrap_or(".husky".to_string()), //
+        dest_dir.unwrap_or(".husky"), //
     );
     let root_dir = husky_dir.clone().parent().unwrap().to_path_buf();
 
@@ -74,14 +74,14 @@ pub fn uninstall() -> () {
     git(vec!["config", "--unset", "core.hooksPath"]).expect("Problem removing hooks");
 }
 
-pub fn set(file: PathBuf, cmd: String) {
+pub fn set(file: &PathBuf, cmd: &str) {
     let err_message = format!(
         "can't create hook, {} directory doesn't exist (try running husky install)",
-        &file.to_str().unwrap()
+        file.to_str().unwrap()
     );
     let dir = file.clone().parent().expect(&err_message).to_path_buf();
     if !dir.exists() {
-        println!("{}", &err_message);
+        println!("{}", err_message);
         process::exit(1);
     }
     let script_to_write = format!("{}\n{}", shell_script::USER_SCRIPT.trim(), &cmd);
@@ -96,15 +96,15 @@ pub fn set(file: PathBuf, cmd: String) {
     fs::set_permissions(file, fs::Permissions::from_mode(0o0755)).expect(&err_message);
 }
 
-pub fn add(file_path: String, cmd: String) -> Result<(), Box<dyn std::error::Error>> {
-    let path = get_absolute_path(&file_path);
+pub fn add(file_path: &str, cmd: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let path = get_absolute_path(file_path);
     if path.exists() {
         let mut file = OpenOptions::new().append(true).open(path)?;
         writeln!(file, "{}", cmd)?;
         println!("Updated {}", &file_path);
         return Ok(());
     } else {
-        set(path, cmd);
+        set(&path, cmd);
         Ok(())
     }
 }
