@@ -1,3 +1,5 @@
+use std::process;
+
 mod utils;
 fn main() {
     let mut args = std::env::args();
@@ -14,6 +16,7 @@ fn main() {
         let cmd = args.nth(0).expect("No command");
         utils::add(file, cmd).unwrap();
     } else {
-        panic!("Unknown command")
+        println!("Unknown command");
+        process::exit(1);
     }
 }
